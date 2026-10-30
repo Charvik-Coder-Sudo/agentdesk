@@ -1,0 +1,19 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest_tmp/
+
+# AgentDesk data: database, backups and logs (never committed)
+data/
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# Local scratch area inside the repository (temporary files)
+.sandbox/
+
+# Claude Code local settings
+.claude/settings.local.json
