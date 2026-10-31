@@ -2,10 +2,10 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.3 |
-| Status | Draft |
-| Last updated | 2026-10-30 |
-| Task ID | T-20261030-001-PLN (maintained by planner-agent, OD-10) |
+| Version | 1.1 |
+| Status | Draft (revision 1.1 of the 1.0 baseline: §11 and §15 security model updated after the Phase 1 audit, pending recording; the 1.0 baseline stays in force) |
+| Last updated | 2026-10-31 |
+| Task ID | T-20261030-002-PLN (previous: T-20261030-001-PLN-2; maintained by planner-agent, OD-10) |
 | Related documents | [srs.md](srs.md), [database-schema.md](database-schema.md), [implementation-plan.md](implementation-plan.md), [traceability-matrix.md](traceability-matrix.md) |
 
 ## Revision history
@@ -15,6 +15,8 @@
 | 0.1 | 2026-10-30 | T-20261030-001-ORC | Initial proposal, presented in conversation | - | Accepted in principle by the project owner |
 | 0.2 | 2026-10-30 | T-20261030-001-ORC | Owner refinements R1-R12: phased schema, Project Connection Wizard, five-category evidence model, manual report ingestion, read-only boundary, interactive detail views. Added ingestion of the agents' change-tracking files (the agent definitions gained a shared tracking protocol on 2026-10-30). | R1-R12 | Pending |
 | 0.3 | 2026-10-30 | T-20261030-001-PLN | Status Draft (E4, OD-18); links to the new SRS. Findings resolved: test-runner files and their verification rule (E1), file-change reviews (E2), no stored owner name (E3), refusal of home, user-profile and drive-root folders (E6, OD-17), checkpoint rate limit (E7, new §6.6). Owner decisions applied: final-message excerpt 1 KB (OD-4), typed name only (OD-5), no Markdown renderer, documents as escaped plain text (OD-6), no automatic stage/commit/discard (OD-12), global Claude settings read only in the Phase 4 wizard check (OD-13), strictly read-only security review and its limitation (OD-16 as corrected by OC-1, new §11.1). Proportionality principle P10 (FU-1, FU-2). Decision register rewritten with status and source; DEC-013 to DEC-017 added as Proposed. | E1-E4, E6, E7; OD-3 to OD-8, OD-12, OD-13, OD-16, OD-17; OC-1; FR-022, FR-039, FR-045, FR-046, FR-049, FR-053, FR-054, FR-059, FR-060, NFR-016, CON-010, CON-012 | Pending |
+| 1.0 | 2026-10-30 | T-20261030-001-PLN-2 | Baseline. Decision register: DEC-001 to DEC-017 Approved, decision files created; DEC-018 to DEC-023 added (dependency files; Q12 and Q13; continuous cycle replaces phase gates; user manuals and final report; JavaScript checks with Node; sandbox real-event verification and in-repository test temp files). §6, §10.3, §13, §14 updated to match. No design change to the running product. | All; CON-004, CON-006, CON-008, CON-014, CON-015, NFR-023, FR-054, FR-060, FR-063 to FR-067, CON-017 to CON-019 | The owner, 2026-10-30 (blanket authorization, OA); DEC-018, DEC-019, DEC-022, DEC-023 under the owner's delegated authority |
+| 1.1 | 2026-10-31 | T-20261030-002-PLN | Security model only, after the Phase 1 audit (T-20261030-002-SEC). §11 Network row: telemetry auto-configuration off (SEC-011). Cross-site requests: every method except GET, HEAD and OPTIONS is checked, and WebSocket connections are refused (SEC-006, SEC-008). Browser hardening: COOP, CORP, Permissions-Policy (SEC-007). Errors: fixed messages, no exception text (SEC-012). New rows: Logs (SEC-001), Database files (SEC-002, SEC-003), Local data privacy (SEC-005, NFR-024). §15 items 20 and 21 (folder permissions; supply-chain residual, SEC-010). §14 and the §16 DEC-022 row still say `node --check`: superseded by DEC-022 Amendment 1, to be aligned in a later pass (this task was limited to the security model). Decision register rows for DEC-024 and DEC-025 to be added in that pass as well. | NFR-001 to NFR-007, NFR-011, NFR-024 (Proposed), FR-011, CON-002, CON-004; DEC-024, DEC-025 | Pending user approval |
 
 ---
 
@@ -192,7 +194,8 @@ Test results and findings are never shown as verified because an agent says so.
 ## 6. Claude Code integration
 
 Based on the official hook reference (code.claude.com/docs/en/hooks), checked 2026-10-30 against the
-installed Claude Code 2.1.314. Phase 4 verifies every field below with real events before relying on it.
+installed Claude Code 2.1.314. Phase 4 verifies every field below with real events before relying on it
+(TASK-061, in a throwaway project under `.sandbox/`, DEC-023).
 
 ### 6.1 Registered events
 
@@ -504,7 +507,7 @@ In Phase 1, every page except Settings is a placeholder that names the phase sho
   - **Test-runner file rule (E1, FR-054).** A test-runner file is labelled `verified` only when both are true:
     1. a hook observed a test-runner shell command complete (PostToolUse or PostToolUseFailure) in the same project;
     2. the file's last-modified time falls inside that command's run window (from its PreToolUse event to its
-       completion event), with a tolerance of 2 seconds either side.
+       completion event), with a tolerance of 2 seconds either side (DEC-019).
 
     Otherwise it is labelled `file_origin_unverified`, shown as *Test-runner file, origin not verified*. The
     matching command is linked from the run. Reason: any agent with write access could write a fake result
@@ -543,7 +546,7 @@ In Phase 1, every page except Settings is a placeholder that names the phase sho
     - no `verified` or `observed` test run, or a failed latest such run;
     - pending approvals;
     - Git-verified UNATTRIBUTED changes without an *accepted* review of their current version (a "changes
-      requested" review keeps the blocker: SRS assumption A-7, question Q12);
+      requested" review keeps the blocker: SRS assumption A-7, DEC-019);
     - a missing audit or a NOT READY verdict.
   - Possible states: "Not ready (N blockers)", "No blockers found, awaiting human release approval",
     "Release approved by &lt;name&gt; on &lt;date&gt; for commit &lt;hash&gt;". Never "secure", never ready on its own.
@@ -552,11 +555,11 @@ In Phase 1, every page except Settings is a placeholder that names the phase sho
 
 | Area | Control |
 |---|---|
-| Network | Binds to 127.0.0.1 by default. Non-loopback host settings are refused at startup. |
+| Network | Binds to 127.0.0.1 by default. Non-loopback host settings are refused at startup. FastAPI's built-in telemetry auto-configuration is switched off in code, so environment variables cannot make AgentDesk send data out (CON-002, SEC-011). |
 | DNS rebinding | Host header allowlist (`127.0.0.1:<port>`, `localhost:<port>`, `[::1]:<port>`), otherwise 400 |
-| Cross-site requests | No CORS headers. State-changing requests need `Content-Type: application/json`, a same-origin or absent `Origin`, and a per-start CSRF token in `X-AgentDesk-CSRF` |
-| Hook ingestion | Requires the ingest token from `data/ingest_token` (random, created at first start); payloads validated and re-sanitized server-side |
-| Browser hardening | Content-Security-Policy `default-src 'self'` with no inline scripts; `X-Content-Type-Options: nosniff`; `Referrer-Policy: no-referrer`; framing denied; `Cache-Control: no-store` on the API |
+| Cross-site requests | No CORS headers. Every request whose method is not GET, HEAD or OPTIONS needs `Content-Type: application/json`, a same-origin or absent `Origin`, and a per-start CSRF token in `X-AgentDesk-CSRF`, on every path (an allow-list of safe methods, SEC-008, DEC-025). WebSocket connections are refused, because AgentDesk has no WebSocket route (SEC-006). GET requests change nothing. |
+| Hook ingestion | Requires the ingest token from `data/ingest_token` (random, created at first start, owner-only access per NFR-024); payloads validated and re-sanitized server-side |
+| Browser hardening | Content-Security-Policy `default-src 'self'` with no inline scripts (the exact string in NFR-004, unchanged); `X-Content-Type-Options: nosniff`; `Referrer-Policy: no-referrer`; framing denied; `Cache-Control: no-store` on the API. Defence in depth (SEC-007, DEC-025): `Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Resource-Policy: same-origin`, and a `Permissions-Policy` that disables device features. The DOM builder refuses string event-handler attributes, `srcdoc` and non-HTTP URL schemes (SEC-009). |
 | Project folders | Drive roots, `C:\Users`, user-profile roots (including the home folder), Windows and program folders and AgentDesk's data folder are refused as projects; an enclosing Git repository rooted at such a location is never used (section 7, FR-022) |
 | File access | Every project path must resolve inside a registered project root after resolving `..`, symlinks and junctions; size caps; binary detection |
 | Sensitive files | The diff and file viewers refuse `.env*`, `*.pem`, `*.key`, `*.pfx`, `*.p12`, `id_rsa*`, `id_ed25519*`, `credentials*`, `secrets.*`, and any file inside AgentDesk's own data folder (for example `ingest_token`), which matters when AgentDesk monitors its own repository |
@@ -566,7 +569,10 @@ In Phase 1, every page except Settings is a placeholder that names the phase sho
 | Wizard writes | Server builds hook entries itself; target restricted to two file names inside a registered project; preview hash binding; backup; atomic write; audit record |
 | Folder browser | Read-only, folder names only, CSRF-protected |
 | Data at rest | No secrets, file contents or prompts stored; redaction on all free text; reports and diffs read live |
-| Errors | JSON errors without stack traces; details in `data/logs/` |
+| Errors | JSON errors without stack traces; handled errors (for example a failed backup) return a fixed plain message per error kind, never exception text or local paths (SEC-012); details in `data/logs/` |
+| Logs | No request bodies or tokens. Values taken from a request (path, Host) are logged escaped and length-limited (at most 200 characters for the path), so a website cannot forge log lines; refusal lines are rate-limited, so a website cannot push earlier history out of the rotating log (SEC-001) |
+| Database files | Request connections open the existing database without creating it (SQLite `mode=rw`); only the startup sequence creates a new database. The running server holds an exclusive lock file in the data folder; `restore_db.py` must take that lock before it replaces the database, and a second server on the same data folder is refused (SEC-002). Restore moves every sidecar (`-wal`, `-shm`, `-journal`) together with the replaced database and integrity-checks the result (SEC-003) |
+| Local data privacy | A new data folder is created with owner-only access (Python standard library). At startup AgentDesk warns when the AgentDesk folder or the data folder grants write access to Everyone, Authenticated Users or Users. These are identified by well-known SIDs; the account name is never read (DEC-009). Secret files such as `ingest_token` are created with owner-only access (NFR-024, from Phase 3). AgentDesk never changes the permissions of an existing folder: restricting it is a documented owner step in the README (SEC-005, DEC-024) |
 
 ### 11.1 Development process: strictly read-only security review and its limitation
 
@@ -620,10 +626,14 @@ agentdesk/
   hooks/agentdesk_hook.py                                                  (Phase 4)
   migrations/            0001_foundation.sql, ...
   tests/
-  docs/                  architecture, schema, plan, agent-activity/, decisions/, testing/, security/
+  docs/                  srs, architecture, schema, plan, traceability, agent-activity/, decisions/, testing/,
+                         security/, user-manual/ (Phase 6, FR-063 to FR-067)
   scripts/               setup.bat, start.bat, backup_db.py, restore_db.py
   data/                  gitignored: agentdesk.db, backups/, logs/, spool/, connection-backups/, ingest_token
-  <dependency files: format open, Q10>  pytest.ini  README.md  CHANGELOG.md  .gitignore
+  .pytest_tmp/           gitignored: pytest temporary files (--basetemp, DEC-023)
+  .sandbox/              gitignored: throwaway Git projects for real-event and fresh-copy checks (DEC-023)
+  requirements.txt  requirements.lock.txt  requirements-dev.txt  (DEC-018)
+  pytest.ini  README.md  CHANGELOG.md  .gitignore
 ```
 
 Changes from the original brief's suggested structure:
@@ -642,10 +652,14 @@ Changes from the original brief's suggested structure:
 
 The hook script uses only the Python standard library. SQLite 3.53.4 (bundled with Python 3.15.2) supports the `STRICT` tables and JSON functions used by the schema.
 
-**Open question Q10 (OD-14).** How the pinned versions are written down (the dependency file format, and
-whether a lock file is used) is not decided. The orchestrator explains the simplest reproducible approach and
-its maintenance cost; the owner chooses before Phase 1 installs anything (TASK-002, TASK-003). The package
-versions above are fixed either way.
+**Dependency files (Q10 closed, DEC-018).** `requirements.txt` pins the two top-level runtime packages.
+`requirements.lock.txt` holds the exact runtime versions, including sub-dependencies, from `pip freeze` in a
+fresh `.venv`; `scripts\setup.bat` installs from it. `requirements-dev.txt` adds pytest and httpx. The lock file
+is regenerated only when a dependency changes. Any new direct dependency still needs the owner's approval (CON-004).
+
+**Development checks (DEC-022).** JavaScript files are syntax-checked with the already-installed Node.js 24
+(`node --check`), and pure functions may be unit-tested with `node --test`. No npm package is used and Node is
+not a dependency of AgentDesk; when Node is missing the check is skipped with a visible reason.
 
 ## 15. Known limitations
 
@@ -678,31 +692,47 @@ versions above are fixed either way.
     trailing checkpoint, so a file changed and changed back inside the window may not appear.
 19. **File-change reviews apply to one version.** Any later edit to the file makes the review outdated, even a
     harmless one; the owner then reviews again.
+20. **Folder permissions on a shared PC** (SEC-005, DEC-024). An existing AgentDesk folder keeps the permissions
+    it inherits from the drive. On this PC that means other Windows accounts could read the data, and could
+    change the code or `.venv`, which then runs as the owner. AgentDesk warns at startup and protects the files it
+    creates (a new data folder, and the ingest token from Phase 3). It does not change existing permissions;
+    restricting them is the owner's step (README). This is harmless on a single-account PC.
+21. **Supply chain** (SEC-010, DEC-018, DEC-025). Package versions are pinned and reproducible but not
+    hash-checked, development sub-dependencies are not locked, and no vulnerability scanner runs, because adding
+    one would be a new dependency (CON-004). A tampered package or an advisory newer than the auditor's knowledge
+    would go unnoticed at install time. Each security audit reviews the pinned versions, and the final audit states
+    this residual.
 
 ## 16. Decision register
 
-All decisions below are **Proposed**: the owner has approved none of them yet (OD-15, OD-18). DEC-001 to DEC-012
-are the recommended options from the 2026-10-30 proposal, adjusted by refinements R1-R12; for DEC-007 to
-DEC-012 the owner has already stated a preference (OD-3 to OD-8). DEC-013 to DEC-017 record the owner's process
-choices. No decision file exists yet: `docs/decisions/DEC-###-<slug>.md` files are created only after the owner
-explicitly approves the decision.
+DEC-001 to DEC-017 were approved by the owner on 2026-10-30 through the blanket authorization of all phases
+(OA, recorded in T-20261030-001-PLN-2). DEC-020 and DEC-021 record the owner's own instructions of the same day.
+DEC-018, DEC-019, DEC-022 and DEC-023 were decided by the orchestrator under the owner's delegated authority
+("resolve minor ambiguities using the simplest maintainable solution"); each record states that basis. Every
+decision has a file `docs/decisions/DEC-###-<slug>.md` (linked below).
 
 | ID | Decision | Status | Source |
 |---|---|---|---|
-| DEC-001 | Stack: FastAPI + Python `sqlite3` with plain SQL (no ORM) + vanilla JS ES modules without a build step | Proposed | Brief §2, R1 |
-| DEC-002 | Hook transport: standard-library Python command hook; async for tool events, synchronous (5 s) for lifecycle events; offline spool | Proposed | Brief §5 |
-| DEC-003 | Hook settings go to `.claude/settings.local.json` by default; `.claude/settings.json` only by explicit choice in the wizard | Proposed | Brief §5, R3 |
-| DEC-004 | Evidence model: five labels, two axes, classification computed on read, no attribution by timing (section 5) | Proposed | R5, R6, FU-6 |
-| DEC-005 | Diffs and reports are read live from the project; the database stores facts, fingerprints and redacted summaries only | Proposed | Brief §7 |
-| DEC-006 | Read-only boundary toward monitored projects; the wizard's previewed and confirmed settings write is the only exception | Proposed | R8 |
-| DEC-007 | Shell commands stored after secret redaction, truncated to 200 characters | Proposed; owner preference recorded (OD-3) | OD-3 |
-| DEC-008 | At most 1 KB (1,024 characters) of a subagent's final message is stored, redacted, with its task ID and report path, labelled agent-reported | Proposed; owner preference recorded (OD-4) | OD-4 |
-| DEC-009 | Approvals and confirmations record the name the owner types; no stored owner profile; the Windows account name is never recorded | Proposed; owner preference recorded (OD-5) | OD-5, E3 |
-| DEC-010 | No chart or diagram libraries and no custom Markdown renderer in version 1; documents are shown as escaped plain text with metadata. A renderer would need a separate future decision with security tests | Proposed; owner preference recorded (OD-6) | OD-6 |
-| DEC-011 | Schema grows by phase: each feature's tables arrive in its own migration | Proposed; owner preference recorded (OD-7) | OD-7, R2 |
-| DEC-012 | Hook installation through the dashboard wizard with an explicit preview and confirmation (and backup), replacing the earlier command-line-only proposal | Proposed; owner preference recorded (OD-8) | OD-8, R3 |
-| DEC-013 | Option B workflow: the Planner maintains requirements, traceability, design documents and task planning; the Developer implements the approved phase and writes the initial tests; the Testing Agent independently reviews, adds edge cases and executes; the Security Audit Agent reviews read-only; the owner approves each phase | Proposed | OD-1, OD-10, OD-11 |
-| DEC-014 | GUI verification through a manual browser checklist run by the owner; no Chrome extension or browser automation | Proposed | OD-2 |
-| DEC-015 | No automatic stage, commit, push, deploy or discard, by AgentDesk or by any agent; the owner commits | Proposed | OD-12 |
-| DEC-016 | `security-audit-agent` is strictly read-only for AgentDesk work and modifies no file; it returns its full report, which the orchestrator records verbatim (audit report, findings register, log entry, each labelled as recorded by the orchestrator); `git status` is compared before and after each security task. Limitation: its global definition keeps Write and Edit and is not changed, so the boundary rests on instructions and is checked by Git afterwards, not prevented (section 11.1) | Proposed | OD-16, OC-1 |
-| DEC-017 | Global Claude Code settings and agent names are read only when a later feature requires it, strictly read-only: only in the Phase 4 wizard configuration check, limited to `disableAllHooks`, hook counts and agent names | Proposed | OD-13 |
+| [DEC-001](decisions/DEC-001-stack-fastapi-sqlite-vanilla-js.md) | Stack: FastAPI + Python `sqlite3` with plain SQL (no ORM) + vanilla JS ES modules without a build step | Approved 2026-10-30 (owner, OA) | Brief §2, R1 |
+| [DEC-002](decisions/DEC-002-hook-transport.md) | Hook transport: standard-library Python command hook; async for tool events, synchronous (5 s) for lifecycle events; offline spool | Approved 2026-10-30 (owner, OA) | Brief §5 |
+| [DEC-003](decisions/DEC-003-hook-settings-local-default.md) | Hook settings go to `.claude/settings.local.json` by default; `.claude/settings.json` only by explicit choice in the wizard | Approved 2026-10-30 (owner, OA) | Brief §5, R3 |
+| [DEC-004](decisions/DEC-004-evidence-model.md) | Evidence model: five labels, two axes, classification computed on read, no attribution by timing (section 5) | Approved 2026-10-30 (owner, OA) | R5, R6, FU-6 |
+| [DEC-005](decisions/DEC-005-live-diffs-and-reports.md) | Diffs and reports are read live from the project; the database stores facts, fingerprints and redacted summaries only | Approved 2026-10-30 (owner, OA) | Brief §7 |
+| [DEC-006](decisions/DEC-006-read-only-boundary.md) | Read-only boundary toward monitored projects; the wizard's previewed and confirmed settings write is the only exception | Approved 2026-10-30 (owner, OA) | R8 |
+| [DEC-007](decisions/DEC-007-shell-command-redaction.md) | Shell commands stored after secret redaction, truncated to 200 characters | Approved 2026-10-30 (owner, OA; preference OD-3) | OD-3 |
+| [DEC-008](decisions/DEC-008-final-message-excerpt-1kb.md) | At most 1 KB (1,024 characters) of a subagent's final message is stored, redacted, with its task ID and report path, labelled agent-reported | Approved 2026-10-30 (owner, OA; preference OD-4) | OD-4 |
+| [DEC-009](decisions/DEC-009-typed-name-no-owner-profile.md) | Approvals and confirmations record the name the owner types; no stored owner profile; the Windows account name is never recorded | Approved 2026-10-30 (owner, OA; preference OD-5) | OD-5, E3 |
+| [DEC-010](decisions/DEC-010-no-markdown-renderer.md) | No chart or diagram libraries and no custom Markdown renderer in version 1; documents are shown as escaped plain text with metadata. A renderer would need a separate future decision with security tests | Approved 2026-10-30 (owner, OA; preference OD-6) | OD-6 |
+| [DEC-011](decisions/DEC-011-phased-schema.md) | Schema grows by phase: each feature's tables arrive in its own migration | Approved 2026-10-30 (owner, OA; preference OD-7) | OD-7, R2 |
+| [DEC-012](decisions/DEC-012-hook-install-wizard.md) | Hook installation through the dashboard wizard with an explicit preview and confirmation (and backup), replacing the earlier command-line-only proposal | Approved 2026-10-30 (owner, OA; preference OD-8) | OD-8, R3 |
+| [DEC-013](decisions/DEC-013-option-b-workflow.md) | Option B workflow: the Planner maintains requirements, traceability, design documents and task planning; the Developer implements the approved phase and writes the initial tests; the Testing Agent independently reviews, adds edge cases and executes; the Security Audit Agent reviews read-only; the owner approves each phase | Approved 2026-10-30 (owner, OA); the clause "the owner approves each phase" is superseded by DEC-020 | OD-1, OD-10, OD-11 |
+| [DEC-014](decisions/DEC-014-manual-browser-checklist.md) | GUI verification through a manual browser checklist run by the owner; no Chrome extension or browser automation | Approved 2026-10-30 (owner, OA); amended by DEC-020: one consolidated checklist at final acceptance | OD-2 |
+| [DEC-015](decisions/DEC-015-no-automatic-git-actions.md) | No automatic stage, commit, push, deploy or discard, by AgentDesk or by any agent; the owner commits | Approved 2026-10-30 (owner, OA); test-fixture scope clarified by DEC-023 | OD-12 |
+| [DEC-016](decisions/DEC-016-read-only-security-review.md) | `security-audit-agent` is strictly read-only for AgentDesk work and modifies no file; it returns its full report, which the orchestrator records verbatim (audit report, findings register, log entry, each labelled as recorded by the orchestrator); `git status` is compared before and after each security task. Limitation: its global definition keeps Write and Edit and is not changed, so the boundary rests on instructions and is checked by Git afterwards, not prevented (section 11.1) | Approved 2026-10-30 (owner, OA) | OD-16, OC-1 |
+| [DEC-017](decisions/DEC-017-global-settings-read-only.md) | Global Claude Code settings and agent names are read only when a later feature requires it, strictly read-only: only in the Phase 4 wizard configuration check, limited to `disableAllHooks`, hook counts and agent names | Approved 2026-10-30 (owner, OA) | OD-13 |
+| [DEC-018](decisions/DEC-018-dependency-files-and-lock.md) | Dependency files: `requirements.txt` (top-level runtime pins), `requirements.lock.txt` (exact runtime versions from `pip freeze`, installed by `setup.bat`), `requirements-dev.txt` (adds pytest, httpx); regenerate the lock only when a dependency changes | Approved 2026-10-30 (orchestrator, owner's delegated authority) | Q10, OD-14, OA |
+| [DEC-019](decisions/DEC-019-review-blocker-and-file-tolerance.md) | A "changes requested" file review keeps the release blocker (A-7); test-runner file tolerance is 2 seconds (A-6) | Approved 2026-10-30 (orchestrator, owner's delegated authority) | Q12, Q13, OA |
+| [DEC-020](decisions/DEC-020-continuous-cycle-replaces-phase-gates.md) | The 13-step continuous improvement cycle with internal verification gates and automatic progression replaces per-phase owner approval; one owner checklist and decision at the end | Approved 2026-10-30 (owner, OA) | OA |
+| [DEC-021](decisions/DEC-021-user-manuals-and-final-report.md) | Five user-manual documents in `docs/user-manual/`, final acceptance verification and a 12-item final report | Approved 2026-10-30 (owner, OA) | OA |
+| [DEC-022](decisions/DEC-022-javascript-checks-with-node.md) | JavaScript checks with the installed Node.js 24, no npm packages: `node --check` on every JS file, optional `node --test` for pure functions; skipped with a visible reason if Node is missing | Approved 2026-10-30 (orchestrator, owner's delegated authority) | OA |
+| [DEC-023](decisions/DEC-023-sandbox-real-event-verification.md) | Phase 4 real-event verification in a throwaway Git project under `.sandbox/`; AgentDesk's own repository is never connected during development; tests write temporary files only under `.pytest_tmp/` | Approved 2026-10-30 (orchestrator, owner's delegated authority) | OA |

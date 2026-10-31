@@ -11,6 +11,13 @@ data/
 *.db-wal
 *.db-shm
 *.log
+# Also anywhere in the repository, for a data folder moved with AGENTDESK_DATA_DIR (SEC-013):
+# rotated logs, unfinished backups and restores, rollback journals and the server lock file.
+*.log.*
+*.db.partial
+*.db.restoring
+*.db-journal
+agentdesk.lock
 
 # Local scratch area inside the repository (temporary files)
 .sandbox/

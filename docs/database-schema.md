@@ -2,10 +2,10 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.3 |
-| Status | Draft |
+| Version | 1.0 |
+| Status | Baselined |
 | Last updated | 2026-10-30 |
-| Task ID | T-20261030-001-PLN (maintained by planner-agent, OD-10) |
+| Task ID | T-20261030-001-PLN-2 (maintained by planner-agent, OD-10) |
 | Related documents | [srs.md](srs.md), [architecture.md](architecture.md), [implementation-plan.md](implementation-plan.md), [traceability-matrix.md](traceability-matrix.md) |
 
 ## Revision history
@@ -15,6 +15,7 @@
 | 0.1 | 2026-10-30 | T-20261030-001-ORC | Single up-front schema, presented in conversation | - | Accepted in principle by the project owner |
 | 0.2 | 2026-10-30 | T-20261030-001-ORC | Split into phased migrations (R2); Phase 1 reduced to two tables; attribution is no longer stored (computed on read); tables added for agent reports and project connections; finding statuses aligned with the agents' findings register; database-enforced separation of proposed and executed tests; immutable approvals | R2 | Pending |
 | 0.3 | 2026-10-30 | T-20261030-001-PLN | Status Draft (E4, OD-18). Removed the planned `owner_display_name` setting (E3, OD-5). `agent_reports.summary` limited to 1,024 characters for subagent final messages (OD-4). `test_runs`: source `junit_xml` renamed `test_runner_file`, new verification value `file_origin_unverified`, new `artifact_mtime` column, CHECKs pairing source and verification (E1). `approvals.subject_type` gains `file_change_review`, with pinning rules for fingerprints and deleted files (E2); subject index now includes the project. Phase 1 DDL unchanged. | E1-E4, OD-4, OD-5; FR-045, FR-053, FR-054, FR-059, FR-060 | Pending |
+| 1.0 | 2026-10-30 | T-20261030-001-PLN-2 | Baseline. No DDL change. Phase 1 DDL approved for implementation; Phases 3-5 DDL stays the planned design and is finalized at each phase start (TASK-036, TASK-051, TASK-066). A-7 and the 2-second tolerance confirmed (DEC-019). | All requirements; FR-054, FR-059, FR-060 | The owner, 2026-10-30 (blanket authorization, OA); DEC-019 under the owner's delegated authority |
 
 ## 1. Conventions
 
@@ -51,8 +52,10 @@
 Every table named in the original brief (projects, sessions, agents, tasks, activity_events, file_changes,
 documents, requirements, test_runs, test_cases, security_findings, approvals) is present by the end of Phase 5.
 
-**Only the Phase 1 DDL below is ready for implementation** (once the owner approves it). Later migrations are
-the planned design. Each is finalized, and this document updated, when its phase starts.
+**Only the Phase 1 DDL below is ready for implementation** (approved by the owner on 2026-10-30, OA). Later
+migrations are the planned design. Each is finalized, and this document updated with a new MINOR version, when
+its phase starts (TASK-036 for `0002`-`0004`, TASK-051 for `0005`, TASK-066 for `0006`-`0009`). Once a migration
+file has been applied anywhere, it is never edited; corrections go into a new migration.
 
 ## 3. Phase 1 (ready for implementation)
 
@@ -402,7 +405,7 @@ CREATE INDEX ix_test_cases_project_status ON test_cases(project_id, status);
 Test-runner files (E1, FR-053, FR-054; Could priority):
 - The label is decided when the file is imported, by the rule in architecture section 10.3: `verified` only if a
   hook observed a test-runner command complete in the same project and `artifact_mtime` lies inside that
-  command's run window (2-second tolerance). Otherwise `file_origin_unverified`.
+  command's run window (2-second tolerance, DEC-019). Otherwise `file_origin_unverified`.
 - A rescan re-checks rows still marked `file_origin_unverified` (an observed event may arrive late). A changed
   file (new `artifact_hash`) is imported as a new row.
 - Release readiness counts only runs with `verification IN ('verified','observed')`.
@@ -501,7 +504,7 @@ END;
   `subject_version`. When the content changes, the newest review for that path shows as outdated.
 - **Labels unchanged**: evidence labels are computed as before; the review is shown beside them.
 - **Release readiness**: an UNATTRIBUTED change is cleared only by an `approved` review whose `subject_version`
-  matches the current version (SRS assumption A-7).
+  matches the current version (SRS assumption A-7, DEC-019).
 - Reviews are immutable like all decided approvals; a new review creates a new row.
 
 ## 7. Relationships (overview)

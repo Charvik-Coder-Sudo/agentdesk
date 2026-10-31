@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AgentDesk</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script type="module" src="/static/js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" id="skip-link" href="#main">Skip to main content</a>
+
+  <header class="app-header">
+    <a class="brand" href="#/overview">
+      <img src="/static/favicon.svg" alt="" width="28" height="28">
+      <span>AgentDesk</span>
+    </a>
+    <div class="header-tools">
+      <p class="server-status" id="server-status" role="status" data-state="checking">
+        <span class="status-icon" aria-hidden="true">&#8230;</span>
+        <span class="status-text">Checking server</span>
+      </p>
+      <div class="theme-control">
+        <label for="theme-select">Theme</label>
+        <select id="theme-select">
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <nav class="app-nav" aria-label="Main">
+    <ul>
+      <li><a href="#/overview">Overview</a></li>
+      <li><a href="#/projects">Projects</a></li>
+      <li><a href="#/agents">Agents</a></li>
+      <li><a href="#/activity">Activity</a></li>
+      <li><a href="#/files">File changes</a></li>
+      <li><a href="#/reports">Reports</a></li>
+      <li><a href="#/documents">Documents</a></li>
+      <li><a href="#/testing">Testing</a></li>
+      <li><a href="#/security">Security</a></li>
+      <li><a href="#/approvals">Approvals</a></li>
+      <li><a href="#/settings">Settings</a></li>
+    </ul>
+  </nav>
+
+  <main id="main" class="app-main" tabindex="-1">
+    <noscript>
+      <p class="notice notice-error">AgentDesk needs JavaScript. Please enable JavaScript for this page and reload it.</p>
+    </noscript>
+  </main>
+
+  <div id="announcer" class="visually-hidden" role="status" aria-live="polite"></div>
+</body>
+</html>
